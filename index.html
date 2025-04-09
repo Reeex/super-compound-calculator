@@ -2,162 +2,26 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>超神複利計算機</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffffff">
-  <link rel="icon" href="icon-192.png" type="image/png">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #ffffff; color: #000000; }
-    .stock { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
-    button { margin: 5px; padding: 8px 16px; border: none; background-color: #007BFF; color: white; border-radius: 5px; cursor: pointer; }
-    button:hover { background-color: #0056b3; }
-    input { padding: 5px; margin: 5px; width: 150px; }
-    table, th, td { border: 1px solid #ddd; border-collapse: collapse; padding: 8px; text-align: center; }
-    th { background-color: #f2f2f2; }
-    #chart-container { width: 100%; height: 400px; margin-top: 30px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon-192.png" type="image/png">
+    <title>超神複利計算機</title>
 </head>
 <body>
-
-<h1>超神複利計算機</h1>
-
-<label>模擬年數：
-  <input type="number" id="years" value="30">
-</label>
-<br><br>
-
-<div id="stocks"></div>
-
-<button onclick="addStock()">新增一支股票</button>
-<button onclick="simulate()">開始模擬</button>
-
-<div id="results"></div>
-
-<div id="chart-container">
-  <canvas id="myChart"></canvas>
-</div>
-
-<script>
-let stockId = 0;
-
-function addStock() {
-  stockId++;
-  const div = document.createElement('div');
-  div.className = 'stock';
-  div.innerHTML = `
-    <h3>第 ${stockId} 支股票</h3>
-    股票名稱: <input type="text" class="name" value="股票${stockId}"><br>
-    初始投入金額（元）: <input type="number" class="initial" value="100000"><br>
-    年股利殖利率（%）: <input type="number" class="dividend" value="4"><br>
-    每月追加投入金額（元）: <input type="number" class="monthly" value="5000"><br>
-  `;
-  document.getElementById('stocks').appendChild(div);
-}
-
-function simulate() {
-  const years = parseInt(document.getElementById('years').value);
-  const stocks = document.querySelectorAll('.stock');
-  let allData = [];
-  let labels = [];
-
-  stocks.forEach(stock => {
-    stock.dataset.total = stock.querySelector('.initial').value;
-  });
-
-  let resultHTML = `<h2>模擬結果</h2><table><tr><th>年份</th>`;
-
-  stocks.forEach(stock => {
-    const name = stock.querySelector('.name').value;
-    resultHTML += `<th>${name}資產(元)</th><th>${name}股利收入(元)</th>`;
-  });
-  resultHTML += `<th>總資產(元)</th></tr>`;
-
-  for (let year = 1; year <= years; year++) {
-    let yearRow = `<tr><td>${year}</td>`;
-    let totalAllStocks = 0;
-    stocks.forEach(stock => {
-      let name = stock.querySelector('.name').value;
-      let dividend = parseFloat(stock.querySelector('.dividend').value) / 100;
-      let monthly = parseFloat(stock.querySelector('.monthly').value);
-      let total = parseFloat(stock.dataset.total);
-
-      let dividendIncome = total * dividend;
-      total += dividendIncome;
-      total += monthly * 12;
-
-      stock.dataset.total = total;
-
-      yearRow += `<td>${total.toFixed(2)}</td><td>${dividendIncome.toFixed(2)}</td>`;
-      totalAllStocks += total;
-
-      if (!allData[name]) allData[name] = [];
-      allData[name].push(total.toFixed(2));
-    });
-
-    yearRow += `<td>${totalAllStocks.toFixed(2)}</td></tr>`;
-    labels.push(year);
-    resultHTML += yearRow;
-  }
-
-  resultHTML += `</table>`;
-  document.getElementById('results').innerHTML = resultHTML;
-
-  drawChart(allData, labels);
-}
-
-function drawChart(allData, labels) {
-  const ctx = document.getElementById('myChart').getContext('2d');
-  if (window.myChart) window.myChart.destroy();
-
-  let datasets = [];
-  for (let name in allData) {
-    datasets.push({
-      label: name,
-      data: allData[name],
-      borderColor: randomColor(),
-      fill: false
-    });
-  }
-
-  window.myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: datasets
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        title: {
-          display: true,
-          text: '資產成長曲線'
+    <h1>超神複利計算機</h1>
+    <p>歡迎使用超神級複利模擬工具！</p>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+            .then(function(registration) {
+                console.log('Service Worker 註冊成功:', registration);
+            })
+            .catch(function(error) {
+                console.log('Service Worker 註冊失敗:', error);
+            });
         }
-      }
-    }
-  });
-}
-
-function randomColor() {
-  return `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
-}
-
-addStock();
-</script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-    .then(function(registration) {
-      console.log('Service Worker 註冊成功：', registration);
-    }).catch(function(error) {
-      console.log('Service Worker 註冊失敗：', error);
-    });
-  }
-</script>
-
+    </script>
 </body>
 </html>
-    
