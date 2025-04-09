@@ -1,13 +1,21 @@
 
 self.addEventListener('install', function(event) {
-    console.log('Service Worker installing.');
-    self.skipWaiting();
+  event.waitUntil(
+    caches.open('v1').then(function(cache) {
+      return cache.addAll([
+        './',
+        './index.html',
+        './manifest.json',
+        './icon-192.png',
+        './icon-512.png'
+      ]);
+    })
+  );
 });
-
-self.addEventListener('activate', function(event) {
-    console.log('Service Worker activating.');
-});
-
 self.addEventListener('fetch', function(event) {
-    event.respondWith(fetch(event.request));
+  event.respondWith(
+    caches.match(event.request).then(function(response) {
+      return response || fetch(event.request);
+    })
+  );
 });
